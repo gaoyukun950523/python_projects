@@ -172,10 +172,29 @@ function showBPMN(){
 	});
 }
 //下载SVG
-function downloadSVG(){
-	if (window.navigator.msSaveOrOpenBlob) {
-		pop.info("IE太烂了，建议使用谷歌浏览器");
-		return;
-	}
-	pop.info("谷歌浏览器太烂了，建议使用IE");
+function downloadSVG(done){
+	bpmnModeler.saveSVG({ format: true }, function(err, xml) {
+		if (err) {
+			return console.error('could not save BPMN 2.0 diagram', err);
+		}
+		// 如果浏览器支持msSaveOrOpenBlob方法（也就是使用IE浏览器的时候）
+		if (window.navigator.msSaveOrOpenBlob) {
+			var blob = new Blob([xml],{type : 'text/plain'});
+			window.navigator.msSaveOrOpenBlob(blob, "2.svg");
+		} else {
+			var eleLink = document.createElement('a');
+			eleLink.download = "2.svg";
+			eleLink.style.display = 'none';
+			var blob = new Blob([xml]);  // 字符内容转变成blob地址
+			eleLink.href = URL.createObjectURL(blob);
+			document.body.appendChild(eleLink);  // 触发点击
+			eleLink.click();
+			document.body.removeChild(eleLink);   // 然后移除
+		}
+	});
+	// if (window.navigator.msSaveOrOpenBlob) {
+	// 	pop.info("IE太烂了，建议使用谷歌浏览器");
+	// 	return;
+	// }
+	// pop.info("谷歌浏览器太烂了，建议使用IE");
 }
